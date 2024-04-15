@@ -1,7 +1,6 @@
 ;;; axy.el --- Adhoc expansion of yasnippets
 
-;; Copyright (c) 2024 <naikvin@gmail.com>
-
+;; Copyright (c) 2024 Vineet Naik <naikvin@gmail.com>
 ;; Author: Vineet Naik <naikvin@gmail.com>
 ;; URL: ??
 ;; Version: 0.1.0
@@ -35,6 +34,8 @@
 
 ;;; Commentary:
 ;;
+;; Axy is short for *A*d hoc e*X*pansion of *Y*asnippets!
+;;
 ;; This file attempts to provide the following workflow:
 ;;
 ;;  1. quickly find a yasnippet
@@ -44,11 +45,51 @@
 ;;
 ;;  3. copy the output to clipboard and close the temp buffer
 ;;
-;; Motivation: For a long time I have been using Dash snippets +
-;; Alfred for snippet expansion. This works great but it's a mac
-;; specific workflow, besides requiring paid versions of both dash and
-;; alfred. This package was implemented as a POC to check if yasnippet
-;; could be used to achieve a similar workflow.
+;; Motivation:
+;;
+;; I have been using Dash snippets + Alfred for snippet expansion for
+;; many years. Although it works great, it's a mac specific
+;; workflow. Moreover, it requires paid versions of both dash and
+;; alfred. This code in this package started out as a POC to check if
+;; yasnippet could be used to achieve a similar workflow. Turns out
+;; that it's possible and workflow is similar and works sufficiently
+;; well (although not as smoothly as dash+alfred).
+;;
+;; Installation:
+;;
+;; The package is not yet uploaded on any of the emacs package
+;; repos. For now, you can clone the repo in an accessible location
+;; and somehow load this file. Then set a global keybinding to the
+;; `axy/find-&-expand-snippet` fn.
+;;
+;; If you use `use-package`, you may add the following lines to your
+;; emacs config:
+;;
+;;     (use-package axy
+;;       :ensure nil
+;;       :requires (yasnippet dash)
+;;       :after (yasnippet)
+;;       :load-path /location/to/axl/repo
+;;       :config
+;;       (global-set-key (kbd "C-c ;") 'axy/find-&-expand-snippet))
+;;
+;; Usage:
+;;
+;; With the above config and keybindings, you can use the keybinding
+;; "C-c ;" globally to invoke `axy/find-&-expand-snippet` fn. It will
+;; first prompt you for the major mode. After selecting the major
+;; mode, it will prompt you to select the snippet from a list of
+;; snippets eligible in that mode. Once the snippet is selected, a new
+;; temporary buffer will open with the expansion of the selected
+;; snippet initiated. Once all the placeholders are entered, you can
+;; use the axy-mode specific keybinding "C-;" which will will copy the
+;; expanded snippet to the clipboard and also cleanup the tmp buffer.
+;;
+;; Known issues:
+;;
+;; The code depends on some of the internal functions from the
+;; yasnippet package. So if the API of these fns changes in future
+;; releases, it could break `axy`.
 
 ;;; Code:
 
