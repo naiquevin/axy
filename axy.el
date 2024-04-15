@@ -6,7 +6,7 @@
 ;; URL: ??
 ;; Version: 0.1.0
 ;; Keywords: Yasnippet
-;; Package-Requires: ((dash "20240103.1301"))
+;; Package-Requires: ((dash "20240103.1301") (yasnippet "20200604.246"))
 
 ;; This program is *not* a part of emacs and is provided under the MIT
 ;; License (MIT) <http://opensource.org/licenses/MIT>
