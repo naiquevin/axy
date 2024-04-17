@@ -118,39 +118,57 @@
 (defun axy/prompt-for-mode ()
   (intern (completing-read "Select a major mode: " (axy/discover-table-names) nil t)))
 
+
+(defun axy/get-snippet-tables (mode)
+  "Get snippet tables for the given mode.
+
+This function is a wrapper over `yas--get-snippet-tables` and
+ensures that the snippet table for the mode is actually
+loaded. This needs to be done because yasnippets are JIT loaded,
+which means snippets for the given mode will not be loaded unless
+the mode itself has been activated at least once."
+  (let* ((tables (yas--get-snippet-tables mode))
+         (is-mode-loaded (-some (lambda (table)
+                                  (string= (yas--table-name table)
+                                           (symbol-name mode)))
+                                (yas--get-snippet-tables 'sh-mode))))
+    (if is-mode-loaded
+        tables
+      ;; Following is the workaround to ensure that snippet table for
+      ;; the mode is loaded. We create a tmp buffer, activate the mode
+      ;; in it and immediately close it. This avoids having to rely on
+      ;; any more interal yasnippet functions OR duplication of code.
+      (let ((tmp-buffer (get-buffer-create "*axy-tmp*")))
+        (switch-to-buffer tmp-buffer)
+        (yas-activate-extra-mode mode)
+        (kill-buffer tmp-buffer)
+        (yas--get-snippet-tables mode)))))
+
+
 (defun axy/find-&-expand-snippet ()
   (interactive)
-  (let ((selected-mode (axy/prompt-for-mode)))
-    ;; Yasnippets are JIT loaded which means snippets for the selected
-    ;; mode will not be loaded unless the mode itself has been
-    ;; activated at least once. As a workaround for this, we create a
-    ;; tmp buffer, activate the mode in it and immediately close
-    ;; it. This avoids having to rely on any more interal yasnippet
-    ;; functions OR duplication of code.
-    (let ((tmp-buffer (get-buffer-create "*axy-tmp*")))
-      (switch-to-buffer tmp-buffer)
-      (yas-activate-extra-mode selected-mode)
-      (kill-buffer tmp-buffer))
-    (let* ((tables (yas--get-snippet-tables selected-mode))
-           (template (yas--prompt-for-template (yas--all-templates tables)))
-           (snippet-file (yas--template-load-file template))
-           ;; Create the snippet buffer only if doesn't exist already
-           (snippet-buffer (if-let ((buf (find-buffer-visiting snippet-file)))
-                               (progn
-                                 (switch-to-buffer buf)
-                                 buf)
+  (let* ((selected-mode (axy/prompt-for-mode))
+         (tables (axy/get-snippet-tables selected-mode))
+         (template (yas--prompt-for-template (yas--all-templates tables)))
+         (snippet-file (yas--template-load-file template))
+         ;; Create the snippet buffer only if doesn't exist already
+         (snippet-buffer (if-let ((buf (find-buffer-visiting snippet-file)))
                              (progn
-                               (yas--visit-snippet-file-1 template)
-                               (setq buffer-read-only t)
-                               ;; Populate the tmp-snippet-buffer val
-                               ;; to indicate that the snippet buffer
-                               ;; was specially created so that it
-                               ;; could be closed by
-                               ;; `axy/clipboard-copy-&-exit` fn
-                               (setq axy/tmp-snippet-buffer (current-buffer))
-                               (current-buffer)))))
-      (yas-tryout-snippet)
-      (axy-mode 1))))
+                               (switch-to-buffer buf)
+                               buf)
+                           (progn
+                             (yas--visit-snippet-file-1 template)
+                             (setq buffer-read-only t)
+                             ;; Populate the tmp-snippet-buffer val
+                             ;; to indicate that the snippet buffer
+                             ;; was specially created so that it
+                             ;; could be closed by
+                             ;; `axy/clipboard-copy-&-exit` fn
+                             (setq axy/tmp-snippet-buffer (current-buffer))
+                             (current-buffer)))))
+    (yas-tryout-snippet)
+    (axy-mode 1)))
+
 
 (defun axy/clipboard-copy-&-exit ()
   (interactive)
