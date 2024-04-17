@@ -182,6 +182,7 @@ the mode itself has been activated at least once."
     (kill-buffer axy/tmp-snippet-buffer)
     (setq axy/tmp-snippet-buffer nil)))
 
+
 ;; Define a simple minor mode so that we can map key-bindings for the
 ;; temporary snippet buffer that `yas-tryout-snippet` function will
 ;; create. Ref: https://emacs.stackexchange.com/a/524
@@ -191,11 +192,13 @@ the mode itself has been activated at least once."
     (define-key map (kbd "C-;") 'axy/clipboard-copy-&-exit)
     map))
 
+
 ;;;###autoload
 (define-minor-mode axy-mode
   "Minor mode that will be enabled in the buffer created by `'yas-tryout-snippet`'"
   :init-value nil
   :lighter " axy"
   :keymap axy-mode-map)
+
 
 (provide 'axy)
