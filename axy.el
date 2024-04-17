@@ -138,10 +138,9 @@ the mode itself has been activated at least once."
       ;; the mode is loaded. We create a tmp buffer, activate the mode
       ;; in it and immediately close it. This avoids having to rely on
       ;; any more interal yasnippet functions OR duplication of code.
-      (let ((tmp-buffer (get-buffer-create "*axy-tmp*")))
-        (switch-to-buffer tmp-buffer)
-        (yas-activate-extra-mode mode)
-        (kill-buffer tmp-buffer)
+      (progn
+        (with-temp-buffer
+          (yas-activate-extra-mode mode))
         (yas--get-snippet-tables mode)))))
 
 
