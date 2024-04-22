@@ -53,7 +53,7 @@ emacs config:
       :after (yasnippet)
       :load-path /path/to/axl/repo
       :config
-      (global-set-key (kbd "C-c ;") 'axy/find-&-expand-snippet))
+      (global-set-key (kbd "C-c C-;") 'axy/find-&-expand-snippet))
 ```
 
 
