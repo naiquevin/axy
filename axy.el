@@ -5,7 +5,7 @@
 ;; URL: https://github.com/naiquevin/axy
 ;; Version: 0.1.0
 ;; Keywords: Yasnippet
-;; Package-Requires: ((dash "20240103.1301") (yasnippet "20200604.246"))
+;; Package-Requires: ((yasnippet "20200604.246"))
 
 ;; This program is *not* a part of emacs and is provided under the MIT
 ;; License (MIT) <http://opensource.org/licenses/MIT>
@@ -58,7 +58,7 @@
 ;;
 ;;     (use-package axy
 ;;       :ensure nil
-;;       :requires (yasnippet dash)
+;;       :requires yasnippet
 ;;       :after (yasnippet)
 ;;       :load-path /location/to/axl/repo
 ;;       :config
@@ -90,7 +90,7 @@
 
 ;;; Code:
 
-(require 'dash)
+(require 'cl-lib)
 
 (defvar axy/all-tables nil)
 
@@ -98,20 +98,20 @@
 
 ;; Inspired by the `yas--subdirs` function in yasnippet.el
 (defun axy/table-dirs (snippets-dir)
-  (-remove (lambda (d)
-             (or (string= (substring d 0 1) ".")
-                 (string-match "\\`#.*#\\'" (file-name-nondirectory d))
-                 (string-match "~\\'" (file-name-nondirectory d))))
-           (condition-case nil
-               (directory-files snippets-dir)
-             (error nil))))
+  (cl-remove-if (lambda (d)
+                  (or (string= (substring d 0 1) ".")
+                      (string-match "\\`#.*#\\'" (file-name-nondirectory d))
+                      (string-match "~\\'" (file-name-nondirectory d))))
+                (condition-case nil
+                    (directory-files snippets-dir)
+                  (error nil))))
 
 (defun axy/discover-table-names ()
   ;; To cover all dirs where snippets could be found,
   ;; `yas--default-user-snippets-dir` needs to be included as well
   (let ((dirs (cons yas--default-user-snippets-dir (yas-snippet-dirs))))
     (or axy/all-tables
-        (let ((tables (-distinct (-mapcat 'axy/table-dirs dirs))))
+        (let ((tables (cl-remove-duplicates (cl-mapcan 'axy/table-dirs dirs) :test 'string=)))
           (setq axy/all-tables tables)
           tables))))
 
@@ -128,10 +128,10 @@ loaded. This needs to be done because yasnippets are JIT loaded,
 which means snippets for the given mode will not be loaded unless
 the mode itself has been activated at least once."
   (let* ((tables (yas--get-snippet-tables mode))
-         (is-mode-loaded (-some (lambda (table)
-                                  (string= (yas--table-name table)
-                                           (symbol-name mode)))
-                                (yas--get-snippet-tables 'sh-mode))))
+         (is-mode-loaded (cl-some (lambda (table)
+                                    (string= (yas--table-name table)
+                                             (symbol-name mode)))
+                                  (yas--get-snippet-tables 'sh-mode))))
     (if is-mode-loaded
         tables
       ;; Following is the workaround to ensure that snippet table for
