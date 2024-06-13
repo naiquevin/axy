@@ -61,7 +61,7 @@ Usage
 -----
 
 Assuming that the global key binding mentioned above is set, you can
-type `C-c ;` from anywhere to invoke the `axy/find-&-expand-snippet`
+type `C-c C-;` from anywhere to invoke the `axy/find-&-expand-snippet`
 fn.
 
 It will first prompt for a major mode. Upon selecting the major mode,
